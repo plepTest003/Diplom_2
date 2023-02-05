@@ -1,7 +1,6 @@
 import io.qameta.allure.junit4.DisplayName;
 import jdk.jfr.Description;
 import org.junit.Test;
-//import org.junit.jupiter.api.DisplayName;
 import java.util.Random;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;

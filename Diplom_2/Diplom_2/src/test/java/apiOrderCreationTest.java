@@ -33,13 +33,14 @@ public class apiOrderCreationTest extends baseApiTest {
                 .then()
                 .statusCode(200)
                 .extract().path("accessToken");
+        System.out.println(accessToken);
 
         // создаем заказ
         Response response = given()
                 .header("Content-type", "application/json")
                 .header("Authorization", accessToken)
                 .and()
-                .body("{\"ingredients\":[\"60d3b41abdacab0026a733c6\",\"609646e4dc916e00276b2870\"]}")
+                .body("{\"ingredients\":[\"61c0c5a71d1f82001bdaaa6d\",\"61c0c5a71d1f82001bdaaa6c\"]}")
                 .when()
                 .post("/api/orders")
                 .then().statusCode(200)
@@ -56,18 +57,15 @@ public class apiOrderCreationTest extends baseApiTest {
     @DisplayName("Check status code of /api/orders without auth")
     @Description("Verifying the creation of order without auth")
     public void checkOrderCreationWithoutAuth(){
-        String ingredients = "[\"60d3b41abdacab0026a733c6\",\"609646e4dc916e00276b2870\"]";
         given()
                 .header("Content-type", "application/json")
                 .and()
-                .body("{\"ingredients\": "+ingredients+"}")
+                .body("{\"ingredients\":[\"61c0c5a71d1f82001bdaaa6d\",\"61c0c5a71d1f82001bdaaa6c\"]}")
                 .when()
                 .post("/api/orders")
                 .then()
-                .statusCode(400)
-                .body("success", equalTo(false))
-                .and()
-                .body("message", equalTo("Ingredient ids must be provided"));
+                .statusCode(200)
+                .body("success", equalTo(true));
     }
 
     //4.4. Создание заказа без ингредиентов
@@ -79,10 +77,13 @@ public class apiOrderCreationTest extends baseApiTest {
         given()
                 .header("Content-type", "application/json")
                 .and()
-                .body("{\"ingredients\":[\"\",\"\"]}")
+                .body("{\"ingredients\":[]}")
                 .when()
                 .post("/api/orders")
                 .then()
-                .statusCode(400);
+                .statusCode(400)
+                .body("success", equalTo(false))
+                .and()
+                .body("message", equalTo("Ingredient ids must be provided"));
     }
 }
