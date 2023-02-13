@@ -1,17 +1,13 @@
-import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
+
 import io.restassured.response.Response;
 import jdk.jfr.Description;
-import org.junit.Before;
 import org.junit.Test;
-//import org.junit.jupiter.api.DisplayName;
-
+import org.junit.jupiter.api.DisplayName;
 import java.util.Random;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-public class apiOrderCreationTest extends baseApiTest {
+public class ApiOrderCreationTest extends BaseApiTest {
     //4.Создание заказа
     //4.1. Создание заказа с авторизацией:
     //4.3. Создание заказа с ингредиентами:
@@ -24,22 +20,13 @@ public class apiOrderCreationTest extends baseApiTest {
         String email = "something" + random.nextInt(10000000) + "@test.com";
         User user = new User( email, "12345", "name");
         creatUniqueUser(user);
-        accessToken = given()
-                .header("Content-type", "application/json")
-                .and()
-                .body(user)
-                .when()
-                .post("/api/auth/login")
-                .then()
-                .statusCode(200)
-                .extract().path("accessToken");
-
+        accessToken = user.successfulLoginRegistUser(user,"/api/auth/login");
         // создаем заказ
         Response response = given()
                 .header("Content-type", "application/json")
                 .header("Authorization", accessToken)
                 .and()
-                .body("{\"ingredients\":[\"60d3b41abdacab0026a733c6\",\"609646e4dc916e00276b2870\"]}")
+                .body("{\"ingredients\":[\"61c0c5a71d1f82001bdaaa6d\",\"61c0c5a71d1f82001bdaaa6c\"]}")
                 .when()
                 .post("/api/orders")
                 .then().statusCode(200)
@@ -56,18 +43,15 @@ public class apiOrderCreationTest extends baseApiTest {
     @DisplayName("Check status code of /api/orders without auth")
     @Description("Verifying the creation of order without auth")
     public void checkOrderCreationWithoutAuth(){
-        String ingredients = "[\"60d3b41abdacab0026a733c6\",\"609646e4dc916e00276b2870\"]";
         given()
                 .header("Content-type", "application/json")
                 .and()
-                .body("{\"ingredients\": "+ingredients+"}")
+                .body("{\"ingredients\":[\"61c0c5a71d1f82001bdaaa6d\",\"61c0c5a71d1f82001bdaaa6c\"]}")
                 .when()
                 .post("/api/orders")
                 .then()
-                .statusCode(400)
-                .body("success", equalTo(false))
-                .and()
-                .body("message", equalTo("Ingredient ids must be provided"));
+                .statusCode(200)
+                .body("success", equalTo(true));
     }
 
     //4.4. Создание заказа без ингредиентов
@@ -75,14 +59,17 @@ public class apiOrderCreationTest extends baseApiTest {
     @Test
     @DisplayName("Check status code of /api/orders without Ingredients")
     @Description("Verifying the creation of order without Ingredients")
-    public void checkOrderCreationWithoutIngredients(){
+    public void checkOrderCreationWithoutIngredients() {
         given()
                 .header("Content-type", "application/json")
                 .and()
-                .body("{\"ingredients\":[\"\",\"\"]}")
+                .body("{\"ingredients\":[]}")
                 .when()
                 .post("/api/orders")
                 .then()
-                .statusCode(400);
+                .statusCode(400)
+                .body("success", equalTo(false))
+                .and()
+                .body("message", equalTo("Ingredient ids must be provided"));
     }
 }

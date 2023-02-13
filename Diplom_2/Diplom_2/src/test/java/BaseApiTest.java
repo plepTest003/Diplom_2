@@ -1,10 +1,10 @@
 import io.qameta.allure.Step;
 import io.restassured.RestAssured;
 import org.junit.Before;
-
+import org.junit.jupiter.api.AfterEach;
 import static io.restassured.RestAssured.given;
 
-public class baseApiTest {
+public class BaseApiTest {
     public static String accessToken;
     @Before
     public void setUp() {
@@ -21,16 +21,15 @@ public class baseApiTest {
                 .post("/api/auth/register")
                 .then().statusCode(200);
     }
-    @Step("Delete Unique User")
+    @AfterEach
     public void deleteCreatedUser(){
-        given()
-                .header("Authorization", accessToken) // добавляем в header авторизационный токен
-                .header("Content-type", "application/json")
-                .and()
-                //.body(user)
-                //.when()
-                .delete("/api/auth/user")
-                .then().statusCode(202);
+        if (accessToken != null) { // проверяем, что accessToken не равен null
+            given()
+                    .header("Authorization", accessToken)
+                    .header("Content-type", "application/json")
+                    .delete("/api/auth/user")
+                    .then()
+                    .statusCode(202);
+        }
     }
 }
-
