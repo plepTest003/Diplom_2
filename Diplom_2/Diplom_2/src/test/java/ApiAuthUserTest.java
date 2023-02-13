@@ -1,16 +1,11 @@
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import jdk.jfr.Description;
-import org.junit.Before;
 import org.junit.Test;
-//import org.junit.jupiter.api.DisplayName;
-
 import java.util.Random;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-public class apiAuthUserTest extends baseApiTest {
+public class ApiAuthUserTest extends BaseApiTest {
     //3.Изменение данных пользователя
     //3.1 Проверяется изменение пользовательских данных с авторизацией
     @Test
@@ -21,14 +16,7 @@ public class apiAuthUserTest extends baseApiTest {
         String email = "something" + random.nextInt(10000000) + "@test.com";
         User user = new User( email, "12345", "name");
         creatUniqueUser(user);
-        accessToken = given()
-                .header("Content-type", "application/json")
-                .and()
-                .body(user)
-                .when()
-                .post("/api/auth/login")
-                .then()
-                .extract().path("accessToken");// забираем accessToken из ответа
+        accessToken = user.successfulLoginRegistUser(user,"/api/auth/login");
         User updatedUser = new User( email, "12345", "NewName");
         given()
                 .header("Content-type", "application/json")
@@ -43,7 +31,6 @@ public class apiAuthUserTest extends baseApiTest {
                 .body("success", equalTo(true))
                 .and()
                 .body("user.name", equalTo("NewName"));
-        deleteCreatedUser();
     }
 
     //3.1 Проверяется изменение пользовательских данных без авторизации

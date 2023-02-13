@@ -1,3 +1,6 @@
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.equalTo;
+
 public class User {
     private String email;
     private String password;
@@ -38,5 +41,32 @@ public class User {
     }
     User(String login){
         this.email = login;
+    }
+    public String successfulLoginRegistUser(User user, String url) {
+        return given()
+                .header("Content-type", "application/json")
+                .and()
+                .body(user)
+                .when()
+                .post(url)
+                .then().statusCode(200)
+                .and()
+                .body("success", equalTo(true))
+                .and()
+                .extract().path("accessToken");// забираем accessToken из ответа
+    }
+    public void respondPostBodyCheck(User user, String url, int statusCode, Boolean result, String bodyMessage) {
+        given()
+                .header("Content-type", "application/json")
+                .and()
+                .body(user)
+                .when()
+                .post(url)
+                .then()
+                .statusCode(statusCode)
+                .and()
+                .body("success", equalTo(result))
+                .and()
+                .body("message", equalTo(bodyMessage));
     }
 }
